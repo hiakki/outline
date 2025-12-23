@@ -38,21 +38,27 @@ export function getBaseDomain() {
 }
 
 /**
- * Extracts the root domain (last two parts) from the base domain.
- * For example: xyz.example.com -> example.com
- * This is used for constructing subdomain workspace URLs.
+ * Extracts the domain for subdomain workspaces by removing the first subdomain
+ * from the base domain. This ensures new workspaces don't add an extra subdomain
+ * layer to the base URL.
+ * 
+ * Examples:
+ * - xyz.app.base.example.com -> app.base.example.com
+ * - base.example.com -> example.com
+ * - example.com -> example.com (unchanged if already root)
  */
 export function getRootDomain() {
   const baseDomain = getBaseDomain();
   const tokens = baseDomain.split(".");
 
-  // Return the last two parts (e.g., example.com from xyz.example.com)
-  // If there are only 2 parts, return as is
+  // If there are 2 or fewer parts, it's already a root domain
   if (tokens.length <= 2) {
     return baseDomain;
   }
 
-  return tokens.slice(-2).join(".");
+  // Remove the first subdomain part, keep the rest
+  // e.g., xyz.app.base.example.com -> app.base.example.com
+  return tokens.slice(1).join(".");
 }
 
 // we originally used the parse-domain npm module however this includes

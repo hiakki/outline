@@ -10,7 +10,8 @@ import { ThemeProvider, useTheme } from "styled-components";
 import { buildDarkTheme, buildLightTheme } from "@shared/styles/theme";
 import type { CustomTheme } from "@shared/types";
 import { TOCPosition, TeamPreference } from "@shared/types";
-import { getRootDomain } from "@shared/utils/domains";
+import { getBaseDomain, getRootDomain } from "@shared/utils/domains";
+import env from "~/env";
 import { TeamValidation } from "@shared/validations";
 import Button from "~/components/Button";
 import ButtonLink from "~/components/ButtonLink";
@@ -310,7 +311,28 @@ function Details() {
                 <>
                   <Trans>Your workspace will be accessible at</Trans>{" "}
                   <strong>
-                    {subdomain}.{getRootDomain()}
+                    {(() => {
+                      // Check if this team's subdomain matches the first subdomain part of the base URL
+                      // If it does, this is the base/default workspace and should use the full base URL
+                      const baseDomain = getBaseDomain();
+                      const baseDomainParts = baseDomain.split(".");
+                      const firstSubdomainPart =
+                        baseDomainParts.length > 2
+                          ? baseDomainParts[0]
+                          : null;
+
+                      // If the team's subdomain matches the first part of the base domain,
+                      // this is the base workspace - show the full base URL
+                      if (
+                        firstSubdomainPart &&
+                        subdomain === firstSubdomainPart
+                      ) {
+                        return new URL(env.URL).hostname;
+                      }
+
+                      // Otherwise, show subdomain with root domain
+                      return `${subdomain}.${getRootDomain()}`;
+                    })()}
                   </strong>
                 </>
               ) : (
