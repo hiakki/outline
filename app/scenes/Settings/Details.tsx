@@ -10,7 +10,7 @@ import { ThemeProvider, useTheme } from "styled-components";
 import { buildDarkTheme, buildLightTheme } from "@shared/styles/theme";
 import type { CustomTheme } from "@shared/types";
 import { TOCPosition, TeamPreference } from "@shared/types";
-import { getBaseDomain } from "@shared/utils/domains";
+import { getRootDomain } from "@shared/utils/domains";
 import { TeamValidation } from "@shared/validations";
 import Button from "~/components/Button";
 import ButtonLink from "~/components/ButtonLink";
@@ -310,7 +310,7 @@ function Details() {
                 <>
                   <Trans>Your workspace will be accessible at</Trans>{" "}
                   <strong>
-                    {subdomain}.{getBaseDomain()}
+                    {subdomain}.{getRootDomain()}
                   </strong>
                 </>
               ) : (
