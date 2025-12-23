@@ -25,7 +25,7 @@ function normalizeUrl(url: string) {
 }
 
 // The base domain is where root cookies are set in hosted mode
-// It's also appended to a team's hosted subdomain to form their app URL
+// This is the full domain from the URL environment variable (e.g., xyz.example.com)
 export function getBaseDomain() {
   const normalEnvUrl = normalizeUrl(env.URL);
   const tokens = normalEnvUrl.split(".");
@@ -35,6 +35,24 @@ export function getBaseDomain() {
   return tokens.length > 1 && RESERVED_SUBDOMAINS.includes(tokens[0])
     ? tokens.slice(1).join(".")
     : normalEnvUrl;
+}
+
+/**
+ * Extracts the root domain (last two parts) from the base domain.
+ * For example: xyz.example.com -> example.com
+ * This is used for constructing subdomain workspace URLs.
+ */
+export function getRootDomain() {
+  const baseDomain = getBaseDomain();
+  const tokens = baseDomain.split(".");
+
+  // Return the last two parts (e.g., example.com from xyz.example.com)
+  // If there are only 2 parts, return as is
+  if (tokens.length <= 2) {
+    return baseDomain;
+  }
+
+  return tokens.slice(-2).join(".");
 }
 
 // we originally used the parse-domain npm module however this includes

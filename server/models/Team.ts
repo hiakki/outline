@@ -28,7 +28,7 @@ import { isEmail } from "validator";
 import { TeamPreferenceDefaults } from "@shared/constants";
 import type { TeamPreferences } from "@shared/types";
 import { TeamPreference, UserRole } from "@shared/types";
-import { getBaseDomain, RESERVED_SUBDOMAINS } from "@shared/utils/domains";
+import { getBaseDomain, getRootDomain, RESERVED_SUBDOMAINS } from "@shared/utils/domains";
 import { parseEmail } from "@shared/utils/email";
 import { TeamValidation } from "@shared/validations";
 import env from "@server/env";
@@ -224,7 +224,9 @@ class Team extends ParanoidModel<
       return env.URL;
     }
 
-    url.host = `${this.subdomain}.${getBaseDomain()}`;
+    // Use root domain for subdomain workspaces (e.g., w1.example.com)
+    // instead of base domain (e.g., w1.xyz.example.com)
+    url.host = `${this.subdomain}.${getRootDomain()}`;
     return url.href.replace(/\/$/, "");
   }
 
