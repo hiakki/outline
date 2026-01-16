@@ -28,7 +28,7 @@ import { isEmail } from "validator";
 import { TeamPreferenceDefaults } from "@shared/constants";
 import type { TeamPreferences } from "@shared/types";
 import { TeamPreference, UserRole } from "@shared/types";
-import { getBaseDomain, RESERVED_SUBDOMAINS } from "@shared/utils/domains";
+import { getBaseDomain, getRootDomain, RESERVED_SUBDOMAINS } from "@shared/utils/domains";
 import { parseEmail } from "@shared/utils/email";
 import { TeamValidation } from "@shared/validations";
 import env from "@server/env";
@@ -224,7 +224,21 @@ class Team extends ParanoidModel<
       return env.URL;
     }
 
-    url.host = `${this.subdomain}.${getBaseDomain()}`;
+    // Check if this team's subdomain matches the first subdomain part of the base URL
+    // If it does, this is the base/default workspace and should use the full base URL
+    const baseDomain = getBaseDomain();
+    const baseDomainParts = baseDomain.split(".");
+    const firstSubdomainPart = baseDomainParts.length > 2 ? baseDomainParts[0] : null;
+
+    // If the team's subdomain matches the first part of the base domain,
+    // this is the base workspace - return the full base URL
+    if (firstSubdomainPart && this.subdomain === firstSubdomainPart) {
+      return env.URL;
+    }
+
+    // Use root domain for other subdomain workspaces (e.g., w1.app.base.example.com)
+    // instead of base domain (e.g., w1.xyz.app.base.example.com)
+    url.host = `${this.subdomain}.${getRootDomain()}`;
     return url.href.replace(/\/$/, "");
   }
 
